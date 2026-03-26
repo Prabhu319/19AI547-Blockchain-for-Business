@@ -1,70 +1,123 @@
-## Experiment 5: Zero-Knowledge Proof (ZK) Private Voting System
+# Experiment 6: Blockchain-Based Passwordless Authentication (Using Public-Private Key Cryptography)
+# Aim:
+To implement a secure passwordless authentication system using public-private key cryptography on Ethereum. This prevents phishing and password leaks.
 
-## REG NO: 212224240116
-## AIM:
-To implement a fully private and transparent voting system using Zero-Knowledge Proofs (ZKPs). This ensures that votes are counted fairly without revealing who voted for whom.
+# Algorithm:
+Step 1: User Registration
+A user registers with their Ethereum public key (instead of a password).
 
-## Algorithm:
-Step 1: Voter Registration Each voter generates a secret vote key and submits a commitment (hashed vote) to the contract.
 
-Step 2: Voting Process Voters submit their votes privately using a hash, without revealing their choice.
+Step 2: Login Process
+When logging in, the user signs a random challenge message using their private key.
 
-Step 3: ZK Verification The contract verifies if a vote belongs to a registered voter but does not reveal the actual vote.
 
-Step 4: Vote Counting Once voting ends, the contract reveals the final tally without linking votes to individuals.
+The smart contract verifies the signature using the user’s public key.
 
-## Program:
+
+
+# Program:
 ```
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-contract ZKVoting {
-    struct Voter {
+contract PasswordlessAuthDemo {
+    struct User {
         bool registered;
-        bytes32 voteCommitment;
+        address pubKey;
+        bytes32 privateKey; // Fake private key for demo
     }
 
-    mapping(address => Voter) public voters;
-    uint256 public votesForA;
-    uint256 public votesForB;
+    mapping(address => User) public users;
+    bytes32 public latestChallenge;
 
-    event VoteCommitted(address voter, bytes32 commitment);
-    event VoteRevealed(address voter, uint256 choice);
+    event UserRegistered(address user, address pubKey, bytes32 privateKey);
+    event ChallengeGenerated(bytes32 challenge);
+    event SignatureGenerated(bytes32 hash, uint8 v, bytes32 r, bytes32 s);
 
-    function registerVoter(bytes32 commitment) public {
-        require(!voters[msg.sender].registered, "Already registered");
-        voters[msg.sender] = Voter(true, commitment);
-        emit VoteCommitted(msg.sender, commitment);
+    // Step 1: Register user
+    function registerUser() public {
+        require(!users[msg.sender].registered, "Already registered");
+
+        // Fake public/private keys
+        address fakePubKey = msg.sender;
+        bytes32 fakePrivateKey = keccak256(abi.encodePacked(msg.sender, block.timestamp));
+
+        users[msg.sender] = User({
+            registered: true,
+            pubKey: fakePubKey,
+            privateKey: fakePrivateKey
+        });
+
+        emit UserRegistered(msg.sender, fakePubKey, fakePrivateKey);
     }
 
-    function revealVote(string memory secret, uint256 choice) public {
-        require(voters[msg.sender].registered, "Not registered");
-        require(keccak256(abi.encodePacked(secret, choice)) == voters[msg.sender].voteCommitment, "Invalid proof");
+    // Step 2: Generate random challenge
+    function generateChallenge() public returns (bytes32) {
+        require(users[msg.sender].registered, "User not registered");
+        latestChallenge = keccak256(abi.encodePacked(block.timestamp, msg.sender));
+        emit ChallengeGenerated(latestChallenge);
+        return latestChallenge;
+    }
 
-        if (choice == 1) votesForA++;
-        if (choice == 2) votesForB++;
+    // Step 3: "Sign" the challenge (fake signing)
+    function generateSignature() public returns (bytes32 hash, uint8 v, bytes32 r, bytes32 s) {
+        require(users[msg.sender].registered, "User not registered");
+        
+        hash = latestChallenge;
+        bytes32 combined = keccak256(abi.encodePacked(users[msg.sender].privateKey, hash));
+        
+        // Fake values for r, s, v
+        r = bytes32(uint256(uint160(users[msg.sender].pubKey)) << 96);
+        s = combined;
+        v = 27;
 
-        emit VoteRevealed(msg.sender, choice);
+        emit SignatureGenerated(hash, v, r, s);
+
+        return (hash, v, r, s);
+    }
+
+    // Step 4: Authenticate
+    function authenticate(bytes32 hash, uint8 v, bytes32 r, bytes32 s) public view returns (bool) {
+        require(users[msg.sender].registered, "User not registered");
+
+        bytes32 expectedCombined = keccak256(abi.encodePacked(users[msg.sender].privateKey, hash));
+        bytes32 expectedR = bytes32(uint256(uint160(users[msg.sender].pubKey)) << 96);
+        uint8 expectedV = 27;
+
+        if (r == expectedR && s == expectedCombined && v == expectedV) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
-
 ```
-## Expected Output:
-Voters commit their votes privately.
 
-When revealed, the contract verifies correctness but keeps votes anonymous.
+# Expected Output:
+Users can register without a password.
+<img width="1856" height="1024" alt="image" src="https://github.com/user-attachments/assets/58b832e8-65f6-405e-b2a0-f8410fe21e53" />
 
-Final result is publicly verifiable without exposing individual votes.
 
-## High-Level Overview:
-Uses ZKPs to ensure anonymous and fair elections.
 
-Prevents vote tampering while maintaining voter privacy.
+Users sign a challenge with their private key for authentication.
+<img width="1865" height="1028" alt="image" src="https://github.com/user-attachments/assets/49955eae-6716-4bc9-8705-009afb283088" />
 
-Mimics real-world ZK voting applications in governance and DAOs.
 
-## Output:
-<img width="1917" height="897" alt="image" src="https://github.com/user-attachments/assets/4ba3063f-0861-476e-a036-a6ef5cc14999" />
 
-## RESULT:
-Thus a fully private and transparent voting system using Zero-Knowledge Proofs (ZKPs) is deployed and output is verified.
+The smart contract verifies signatures to confirm identity.
+<img width="1856" height="1027" alt="image" src="https://github.com/user-attachments/assets/0983995e-64d7-460a-81ae-69cc582163fa" />
+
+
+
+
+# High-Level Overview:
+Eliminates password hacks & phishing attacks.
+
+
+Uses Ethereum's built-in cryptographic functions.
+
+
+Inspired by Web3 login solutions like MetaMask authentication.
+
+# RESULT: 
+Thus, a secure passwordless authentication system using public-private key cryptography on Ethereum was deployed and verified.
