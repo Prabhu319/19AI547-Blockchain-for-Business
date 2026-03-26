@@ -1,4 +1,6 @@
 # Experiment 6: Blockchain-Based Passwordless Authentication (Using Public-Private Key Cryptography)
+# Name: prabanjan m
+# Reg No:212224240116
 # Aim:
 To implement a secure passwordless authentication system using public-private key cryptography on Ethereum. This prevents phishing and password leaks.
 
@@ -95,12 +97,18 @@ contract PasswordlessAuthDemo {
 
 # Expected Output:
 Users can register without a password.
+<img width="1856" height="1024" alt="image" src="https://github.com/user-attachments/assets/58b832e8-65f6-405e-b2a0-f8410fe21e53" />
+
 
 
 Users sign a challenge with their private key for authentication.
+<img width="1865" height="1028" alt="image" src="https://github.com/user-attachments/assets/49955eae-6716-4bc9-8705-009afb283088" />
+
 
 
 The smart contract verifies signatures to confirm identity.
+<img width="1856" height="1027" alt="image" src="https://github.com/user-attachments/assets/0983995e-64d7-460a-81ae-69cc582163fa" />
+
 
 
 
@@ -114,3 +122,4 @@ Uses Ethereum's built-in cryptographic functions.
 Inspired by Web3 login solutions like MetaMask authentication.
 
 # RESULT: 
+Thus, a secure passwordless authentication system using public-private key cryptography on Ethereum was deployed and verified.
